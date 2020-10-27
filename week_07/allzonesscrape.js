@@ -64,7 +64,7 @@ for (let fileIndex = 0; fileIndex<aaPages.length; fileIndex++){
         } else {
             mtgWheelchair = false;
         }
-        let mtgDetails = $('.detailsBox', this).text().trim();
+        let allrandomDetails = $('.detailsBox', this).text().trim();
         
         for (let i=0; i<mtgInfo.length; i++){
             for (let j=0; j<mtgInfo[i].length; j++){
@@ -83,7 +83,7 @@ for (let fileIndex = 0; fileIndex<aaPages.length; fileIndex++){
                 meetingJSON['mtgTypeOf'] = mtgTypeOf;
                 meetingJSON['specialInt'] = specialInterest;
                 meetingJSON['mtgPlace'] = place;
-                meetingJSON['mtgPlaceNotes'] = mtgDetails;
+                meetingJSON['mtgPlaceNotes'] = allrandomDetails;
                 meetingJSON['mtgZone'] = mtgAAZone;
                 meetingJSON['mtgAddress'] = addressJSON;
                 meetingJSON['mtgWheelchair'] = mtgWheelchair;
