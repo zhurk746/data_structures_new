@@ -8,15 +8,15 @@ const fs = require('fs'),
 
 var aaPages = ['m01.txt', 'm02.txt', 'm03.txt', 'm04.txt', 'm05.txt', 'm06.txt', 'm07.txt', 'm08.txt', 'm09.txt', 'm10.txt'];
 
-let content, mtgAAZone;
+
 
 // meeting details will be stored in this array where I plan to push JSON
 let meetings = [];
 
 for (let fileIndex = 0; fileIndex<aaPages.length; fileIndex++){
     //put meeting contents into variable
-    content = fs.readFileSync(aaPages[fileIndex]);
-    mtgAAZone = aaPages[fileIndex].toString().slice(-6, -4);
+    let content = fs.readFileSync(aaPages[fileIndex]);
+    let mtgAAZone = aaPages[fileIndex].toString().slice(-6, -4);
     
         // parse `content` into a cheerio object like in week 2
     let $ = cheerio.load(content,{
@@ -43,28 +43,28 @@ for (let fileIndex = 0; fileIndex<aaPages.length; fileIndex++){
         // // creating a JSON ojbect that can hold the address to use for geocoding
         let addressJSON = {};
         // // adding New York, NY for geocode
-        addressJSON['address'] = address[0] + ", New York, NY";
+        addressJSON['address'] = address[0];
         
         // //additional part of the address data 
         addressJSON['detailsofAddress'] = address[1];
         
-        let mtgDetails = $('.detailsBox', this).text().trim();
-        
-        let wheelchair = $('span[style="color:darkblue; font-size:10pt;"]', this).html();
-        let mtgWheelchair;
-        if (wheelchair!= null){
-            mtgWheelchair = true;
-        } else {
-            mtgWheelchair = false;
-        }
-        
         //get all meeting info in 2nd part of table like days it meets, times, special interests
+        //split on this \n\t\t\t \t\t\t<br>\n                    \t<br>\n                    \t\n\t\t\t\t  \t    as it occurs in each part
         
         let meetingInfoDayTime = $('td[style="border-bottom:1px solid #e3e3e3;width:350px;"]', this).html().split('\n\t\t\t \t\t\t<br>\n                    \t<br>\n                    \t\n\t\t\t\t  \t    ');
         let meetingInfoDayTimeTrim = meetingInfoDayTime.map(x=>x.trim());
         
         let mtgInfo = []; // mtgDTT = meeting Day Time Type
         mtgInfo.push(meetingInfoDayTimeTrim);
+         
+         let wheelchair = $('span[style="color:darkblue; font-size:10pt;"]', this).html();
+         let mtgWheelchair;
+        if (wheelchair!= null){
+            mtgWheelchair = true;
+        } else {
+            mtgWheelchair = false;
+        }
+        let mtgDetails = $('.detailsBox', this).text().trim();
         
         for (let i=0; i<mtgInfo.length; i++){
             for (let j=0; j<mtgInfo[i].length; j++){
