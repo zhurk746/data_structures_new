@@ -11,10 +11,11 @@ let $ = cheerio.load(content);
 let meetings=[];
 $('div table tbody tr').each(function(i, elem) {
     let infoJSON={};
-    let meetingInfo=$('.detailsBox', this).text().trim();
+    //let meetingInfo=$('.detailsBox', this).text().trim();
     //split on series of n and t common to all 
-    let meetingScrub=$('td[style="border-bottom:1px solid #e3e3e3;width:350px;"]', this).html().split("\n\t\t\t \t\t\t<br>\n                    \t<br>\n                    \t\t\n\t\t\t\t\t");
-    let messy = meetingScrub.map(x => x.trim());
+    let meetingScrub=$('td[style="border-bottom:1px solid #e3e3e3;width:350px;"]', this).html();
+    let split1=meetingScrub.split("\n\t\t\t \t\t\t<br>\n                    \t<br>\n                    \t\t\n\t\t\t\t\t");
+    let messy = split1.map(x => x.trim());
     let Info = []; 
     Info.push(messy);
     //console.log(Info);

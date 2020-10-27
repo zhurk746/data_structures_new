@@ -11,8 +11,9 @@ let $ = cheerio.load(content);
 let Names = []; 
 $('div table tbody tr').each(function(i, elem) {
         //let meetingJSON = {};
-        let mtgPlaceName = $('td[style="border-bottom:1px solid #e3e3e3; width:260px"]', this).html().replace(/[\t\n]/g,'').split('<br>');
-        let mtgPlaceTrim = mtgPlaceName.map(x=>x.trim());
+        let mtgPlaceName = $('td[style="border-bottom:1px solid #e3e3e3; width:260px"]', this).html().replace(/[\t\n]/g,'');
+        let split1=mtgPlaceName.split('<br>');
+        let mtgPlaceTrim = split1.map(x=>x.trim());
         
         
         let place = mtgPlaceTrim[0].replace(/(<([^>]+)>)/ig,'');
