@@ -9,7 +9,14 @@ let content = fs.readFileSync('m06.txt');
 let $ = cheerio.load(content);
 
 let Names = []; 
-$('td').each(function(i, elem) {
+$('div table tbody tr').each(function(i, elem) {
+        //let meetingJSON = {};
+        let mtgPlaceName = $('td[style="border-bottom:1px solid #e3e3e3; width:260px"]', this).html().replace(/[\t\n]/g,'').split('<br>');
+        let mtgPlaceTrim = mtgPlaceName.map(x=>x.trim());
+        
+        
+        let place = mtgPlaceTrim[0].replace(/(<([^>]+)>)/ig,'');
+/*$('td').each(function(i, elem) {
     var html = $(elem).html();
     var split1 = html.split("<br>");
     if (split1.length < 3 || split1[2].indexOf("<") >= 0) {
@@ -26,12 +33,12 @@ $('td').each(function(i, elem) {
     var addressName=split3[0].trim();
 
    //var split3 = address.split(".");
-   // var scrubbedAddress = split3[0].trim();
+   // var scrubbedAddress = split3[0].trim();*/
     
-    if (addressName == "") {
+    if (place == "") {
         return;
     }
-    Names.push(addressName);
+    Names.push(place);
 });
 
 console.log(Names);

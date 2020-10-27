@@ -9,7 +9,16 @@ let content = fs.readFileSync('m06.txt');
 let $ = cheerio.load(content);
 
 let meetingNames = []; 
-$('td').each(function(i, elem) {
+//cleaner
+$('div table tbody tr').each(function(i, elem) {
+        //let meetingJSON = {};
+        let mtgPlaceName = $('td[style="border-bottom:1px solid #e3e3e3; width:260px"]', this).html().replace(/[\t\n]/g,'').split('<br>');
+        let mtgPlaceTrim = mtgPlaceName.map(x=>x.trim());
+        
+        
+        let finalTitle = mtgPlaceTrim[1].replace(/(<([^>]+)>)/ig,'');
+//old attempts
+/*$('td').each(function(i, elem) {
     var html = $(elem).html();
     var split1 = html.split("<br>");
     if (split1.length < 3 || split1[2].indexOf("<") >= 0) {
@@ -26,7 +35,7 @@ $('td').each(function(i, elem) {
     var Title=split3[0].trim();
 
    var split4 = Title.split("<b>");
-   var finalTitle = split4[1].trim();
+   var finalTitle = split4[1].trim();*/
     
     if (finalTitle== "") {
         return;
