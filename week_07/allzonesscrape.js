@@ -26,8 +26,9 @@ for (let fileIndex = 0; fileIndex<aaPages.length; fileIndex++){
     //first part of table below with meeting place, name and address
     $('div table tbody tr').each(function(i, elem) {
         let meetingJSON = {};
-        let mtgPlaceName = $('td[style="border-bottom:1px solid #e3e3e3; width:260px"]', this).html().replace(/[\t\n]/g,'').split('<br>');
-        let mtgPlaceTrim = mtgPlaceName.map(x=>x.trim());
+        let mtgPlaceName = $('td[style="border-bottom:1px solid #e3e3e3; width:260px"]', this).html().replace(/[\t\n]/g,'')
+        let split1=mtgPlaceName.split('<br>');
+        let mtgPlaceTrim = split1.map(x=>x.trim());
         
         
         let place = mtgPlaceTrim[0].replace(/(<([^>]+)>)/ig,'');
@@ -51,12 +52,14 @@ for (let fileIndex = 0; fileIndex<aaPages.length; fileIndex++){
         //get all meeting info in 2nd part of table like days it meets, times, special interests
         //split on this \n\t\t\t \t\t\t<br>\n                    \t<br>\n                    \t\n\t\t\t\t  \t    as it occurs in each part
         
-        let meetingInfoDayTime = $('td[style="border-bottom:1px solid #e3e3e3;width:350px;"]', this).html().split('\n\t\t\t \t\t\t<br>\n                    \t<br>\n                    \t\n\t\t\t\t  \t    ');
-        let meetingInfoDayTimeTrim = meetingInfoDayTime.map(x=>x.trim());
+        let meetingInfoDayTime = $('td[style="border-bottom:1px solid #e3e3e3;width:350px;"]', this).html()
+        let split2=meetingInfoDayTime.split('\n\t\t\t \t\t\t<br>\n                    \t<br>\n                    \t\n\t\t\t\t  \t    ');
+        let meetingInfoDayTimeTrim = split2.map(x=>x.trim());
         
         let mtgInfo = []; // mtgDTT = meeting Day Time Type
         mtgInfo.push(meetingInfoDayTimeTrim);
          
+         //set wheelchair as a boolean
          let wheelchair = $('span[style="color:darkblue; font-size:10pt;"]', this).html();
          let mtgWheelchair;
         if (wheelchair!= null){
