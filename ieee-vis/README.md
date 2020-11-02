@@ -1,6 +1,6 @@
 <h3> Eating with a Conscience: <h3/>
 <h4> Toward a Visual and Contextual Nutrition Facts Label <h4/>
-Link: <https://virtual.ieeevis.org/paper_w-comm-1011.html>
+Link: <a href="https://virtual.ieeevis.org/paper_w-comm-1011.html">https://virtual.ieeevis.org/paper_w-comm-1011.html</a>
 
 <p> The variety of food options available to the consumer in the market today causes the process of choosing goods that support the diet-conscious consumer’s goal of a well balanced diet quite complex. 
 People have grown increasingly conscious of their food choices and product selection in order to stay healthy and maintain a balanced diet. 
