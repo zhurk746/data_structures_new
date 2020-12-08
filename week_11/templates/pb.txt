@@ -1,0 +1,30 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Kasey's Restaurant Log</title>
+  <meta name="description" content="Kasey's Restaurant Log">
+  <meta name="author" content="Kasey Zhuravlev">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css?v=1.0">
+
+</head>
+
+<body>
+
+<script>
+var data = {{{pbdata}}}; 
+console.log(queryResults)
+
+</script>
+
+<h3>Kasey's Restaurant Log</h3>
+
+<div id='myEntries'></div>
+
+<p><span class="blinking">Here's everywhere I ate!</span></p>
+
+</body>
+</html>

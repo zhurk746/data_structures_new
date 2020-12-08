@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <!-- Adapted from: http://bl.ocks.org/Caged/6476579 -->
-
+<h2> What's the avg temperature when the fire alarm goes off? </h2>
 <style>
 
 body {
@@ -16,11 +16,11 @@ body {
 }
 
 .bar {
-  fill: orange;
+  fill: red;
 }
 
 .bar:hover {
-  fill: orangered ;
+  fill: green ;
 }
 
 .x.axis path {
@@ -126,5 +126,7 @@ svg.call(tip);
       .attr("height", function(d) { return height - y(d.num_obs); })
       .on('mouseover', tip.show)
       .on('mouseout', tip.hide)
+      
+    d3.select('h2').style("color","red")
 
 </script>
