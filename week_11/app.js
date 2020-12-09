@@ -67,8 +67,9 @@ var jx = `;
 
     for (var i=0; i<data.length; i++) {
         L.marker([data[i].mtglat, data[i].mtglong], {icon: greenIcon}).bindPopup(JSON.stringify(data[i].meetings)).addTo(mymap);
+        
     }
-    console.log(data[0]);
+    console.log(data[1]["meetings"][0]["day"])
     </script>
     </body>
     </html>`;

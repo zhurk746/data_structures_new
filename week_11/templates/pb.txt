@@ -10,23 +10,65 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <link rel="stylesheet" href="css/styles.css?v=1.0">
   <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+<style>
+table {
+  border-collapse: collapse;
+  font-family: sans-serif;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
+h3, p {
+    font-family: sans-serif;
+}
+
+p {
+    color: red;
+}
+
+td {
+  border-top:0pt none;
+  margin-top:0pt;
+  padding-bottom:5px;
+  padding-left:12px;
+  padding-right:12px;
+  padding-top:5px;
+}
+
+.blinking{
+    animation:blinkingText 1.5s linear infinite;
+}
+@keyframes blinkingText{
+  50% {
+    opacity: 0;
+  }
+}
+</style>
 
 </head>
 
 <body>
 
+<p><span class="blinking">Here's everywhere I ate!</span></p>
+
 <script>
-var data = {{{pbdata}}}; 
+var data = {{{pbdata}}}
+</script>
+
 <ul class="myEntries">
-{{#each queryResults}}{{@pk}}: {{this}} {{/each}}
+{{#each queryResults}}: {{this}} {{/each}}
 </ul>
-var myTable = '<table><thead><tr><th>date</th><th>category</th><th>entry</th></tr></thead><tbody>';
+
+<script>
+var myTable = '<table><thead><tr><th>Date</th><th>What I Ordered</th><th>Restaurant Name</th></tr></thead><tbody>';
 
 for (var i=0; i < data.length; i++) {
 	myTable += '<tr>';
-	myTable += '<td>' + data[i].dt.date + '</td>';
-	myTable += '<td>' + data[i].iate.S + '</td>';
-	myTable += '<td>' + data[i].entry.S + '</td>';
+	myTable += '<td>' + data[i][0].date.S + '</td>';
+	myTable += '<td>' + data[i][0].iate.SS.join(', ') + '</td>';
+	myTable += '<td>' + data[i][0].entry.S + '</td>';
 	myTable += '</tr>';
 
 }
@@ -42,7 +84,7 @@ $(window).on('load', function() {
 
 <div id='myEntries'></div>
 
-<p><span class="blinking">Here's everywhere I ate!</span></p>
+
 
 </body>
 </html>
