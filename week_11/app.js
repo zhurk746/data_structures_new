@@ -56,10 +56,19 @@ var jx = `;
     id: 'mapbox/streets-v11',
         accessToken: 'pk.eyJ1Ijoidm9ucmFtc3kiLCJhIjoiY2pveGF1MmxoMjZnazNwbW8ya2dsZTRtNyJ9.mJ1kRVrVnwTFNdoKlQu_Cw'
     }).addTo(mymap);
+    var greenIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
     for (var i=0; i<data.length; i++) {
-        L.marker([data[i].mtglat, data[i].mtglong]).bindPopup(JSON.stringify(data[i].meetings)).addTo(mymap);
-        console.log(data[2])
+        L.marker([data[i].mtglat, data[i].mtglong], {icon: greenIcon}).bindPopup(JSON.stringify(data[i].meetings)).addTo(mymap);
     }
+    console.log(data[0]);
     </script>
     </body>
     </html>`;
@@ -108,7 +117,7 @@ app.get('/temperature', function(req, res) {
 
     // SQL query 
     var q = `SELECT EXTRACT(DAY FROM sensorTime) as sensorday,
-             AVG(sensorValue/100::int) as num_obs
+             AVG(sensorValue::int) as num_obs
              FROM sensorData
              GROUP BY sensorday
              ORDER BY sensorday;`;

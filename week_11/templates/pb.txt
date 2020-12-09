@@ -9,6 +9,7 @@
   <meta name="author" content="Kasey Zhuravlev">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <link rel="stylesheet" href="css/styles.css?v=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
 
 </head>
 
@@ -16,8 +17,25 @@
 
 <script>
 var data = {{{pbdata}}}; 
-console.log(queryResults)
+<ul class="myEntries">
+{{#each queryResults}}{{@pk}}: {{this}} {{/each}}
+</ul>
+var myTable = '<table><thead><tr><th>date</th><th>category</th><th>entry</th></tr></thead><tbody>';
 
+for (var i=0; i < data.length; i++) {
+	myTable += '<tr>';
+	myTable += '<td>' + data[i].dt.date + '</td>';
+	myTable += '<td>' + data[i].iate.S + '</td>';
+	myTable += '<td>' + data[i].entry.S + '</td>';
+	myTable += '</tr>';
+
+}
+
+myTable += '</body></table>'
+
+$(window).on('load', function() {
+  $("#myEntries").html(myTable)
+});
 </script>
 
 <h3>Kasey's Restaurant Log</h3>

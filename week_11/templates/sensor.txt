@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <!-- Adapted from: http://bl.ocks.org/Caged/6476579 -->
-<h2> What's the avg temperature when the fire alarm goes off? </h2>
+<h2> Temperature in Kasey's apartment</h2>
 <style>
 
 body {
@@ -16,11 +16,11 @@ body {
 }
 
 .bar {
-  fill: red;
+  fill: purple;
 }
 
 .bar:hover {
-  fill: green ;
+  fill: orange ;
 }
 
 .x.axis path {
@@ -66,8 +66,6 @@ var margin = {top: 40, right: 20, bottom: 30, left: 40},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
-var formatPercent = d3.format(".0%");
-
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, width], .1);
 
@@ -81,13 +79,13 @@ var xAxis = d3.svg.axis()
 var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left")
-    .tickFormat(formatPercent);
+    
 
 var tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-10, 0])
   .html(function(d) {
-    return "<strong>Percentage:</strong> <span style='color:red'>" + formatPercent(d.num_obs) + "</span>";
+    return "<strong>MaxValue:</strong> <span style='color:red'>" + d.num_obs + "</span>";
   })
 
 var svg = d3.select("body").append("svg")
@@ -114,7 +112,7 @@ svg.call(tip);
       .attr("y", 6)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("Percentage");
+      .text("MaxValue");
 
   svg.selectAll(".bar")
       .data(data)
@@ -126,7 +124,6 @@ svg.call(tip);
       .attr("height", function(d) { return height - y(d.num_obs); })
       .on('mouseover', tip.show)
       .on('mouseout', tip.hide)
-      
-    d3.select('h2').style("color","red")
 
+d3.select('h2').style("color","purple")
 </script>
