@@ -1,129 +1,258 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <!-- Adapted from: http://bl.ocks.org/Caged/6476579 -->
-<h2> Temperature in Kasey's apartment</h2>
+
 <style>
 
 body {
-  font: 10px sans-serif;
-}
+        font: 10px "Helvetica Neue", Helvetica, Arial, sans-serif;
+        background-color: #c0c0c0;
+    }
+    .axis path
+    .axis line {
+        fill: none;
+        stroke: #f2f3f4;
+        shape-rendering: crispEdges;
+    }
 
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
+    .x.axis path {
+        display: none;
+    }
 
-.bar {
-  fill: purple;
-}
+    .line {
+        fill: none;
+        stroke: #ff5470;
+        stroke-width: 1.5px;
+    }
 
-.bar:hover {
-  fill: orange ;
-}
+    .overlay {
+        fill: none;
+        pointer-events: all;
+    }
 
-.x.axis path {
-  display: none;
-}
+    .focus circle {
+        fill: steelblue;
+    }
 
-.d3-tip {
-  line-height: 1;
-  font-weight: bold;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.8);
-  color: #fff;
-  border-radius: 2px;
-}
-
-/* Creates a small triangle extender for the tooltip */
-.d3-tip:after {
-  box-sizing: border-box;
-  display: inline;
-  font-size: 10px;
-  width: 100%;
-  line-height: 1;
-  color: rgba(0, 0, 0, 0.8);
-  position: absolute;
-  text-align: center;
-}
-
-/* Style northward tooltips differently */
-.d3-tip.n:after {
-  margin: -1px 0 0 0;
-  top: 100%;
-  left: 0;
-}
+    .focus text {
+        font-size: 14px;
+        font-color: #f2f3f4
+    }
+    
 </style>
 <body>
+<h1 style="color:#ff5470">Highlights of the Ongoing Battle with my Radiator Heat</h1>
+<p style="font-size: 14px;" >Uncontrollable radiator heat, AC on, all windows open, multiples blankets of varying thickness. I guess a room is room temperature regardless of the actual temperature?</p>
+<p style="font-size: 12px; color:">The below graphs represents a continuous investigation of temperature fluctations in my apartment focusing on the last month of data collected through the Particle API.
+<br> Variables that may affect the drastic shifts in temperature include: cooking, steam coming from the bathrooms, open windows, and radiator heat.
+</p>
+<p>
+The temperature averages around 80 degrees on any given day with fluctuations between 3 to 9 degrees.
+<br>The temperature in the apartment seems to be more comfortable during a given week when the outdoor temperature is less tumultuous.
+<br>Temperatures seem to fluctuate the most towards the end of each week and the weekends.
+<br> This is likely due to the presence of guests or more people coming in and out of the apartment over the weekend.
+</p>
+
 <script src="https://d3js.org/d3.v3.min.js"></script>
 <script src="https://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 <script>
-
 var data = {{{sensordata}}} ; 
 
-var margin = {top: 40, right: 20, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+var margin = { top: 30, right: 120, bottom: 30, left: 50 },
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom,
+        tooltip = { width: 100, height: 100, x: 10, y: -30 };
 
-var x = d3.scale.ordinal()
-    .rangeRoundBands([0, width], .1);
 
-var y = d3.scale.linear()
-    .range([height, 0]);
+    var x = d3.scale.ordinal()
+            .rangeRoundBands([0, width], .1);
 
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom");
+    var y = d3.scale.linear()
+            .range([height, 0]);
 
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left")
+
+    var line = d3.svg.line()
+        .x(function(d) { return x(d.sensorday); })
+        .y(function(d) { return y(d.num_obs); });
+
+var valueline = d3.svg.line()
+    .x(function(d) { return x(d.sensorday); })
+    .y(function(d) { return y(d.avg_obs); });
     
-
-var tip = d3.tip()
-  .attr('class', 'd3-tip')
-  .offset([-10, 0])
-  .html(function(d) {
-    return "<strong>MaxValue:</strong> <span style='color:red'>" + d.num_obs + "</span>";
-  })
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-svg.call(tip);
-
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+    var lineSvg = svg.append("g");
+    var bisectDate = d3.bisector(function(d) { return d.sensorday; }).left;
+    
   x.domain(data.map(function(d) { return d.sensorday; }));
   y.domain([0, d3.max(data, function(d) { return d.num_obs; })]);
 
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
+svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
 
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("MaxValue");
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Temp Fluctation");
+            
+            
+            svg.append("path")
+            .datum(data)
+            .attr("class", "line")
+            .attr("d", line);
 
-  svg.selectAll(".bar")
-      .data(data)
-    .enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", function(d) { return x(d.sensorday); })
-      .attr("width", x.rangeBand())
-      .attr("y", function(d) { return y(d.num_obs); })
-      .attr("height", function(d) { return height - y(d.num_obs); })
-      .on('mouseover', tip.show)
-      .on('mouseout', tip.hide)
+            var focus = svg.append("g")
+            .attr("class", "focus")
+            .style("display", "none");
+            
+            lineSvg.append("path")
+            .attr("class", "line")
+            .attr("d", valueline(data));
 
-d3.select('h2').style("color","purple")
+            focus.append("circle")
+            .attr("class", "y")
+            .style("fill", "none") 
+            .style("stroke", "blue") 
+            .attr("r", 5);
+
+            svg.append("rect")
+            .attr("class", "overlay")
+            .attr("width", width)
+            .attr("height", height)
+            .on("mouseover", function() { focus.style("display", null); })
+            .on("mouseout", function() { focus.style("display", "none"); })
+            .on("mousemove", mousemove);
+
+        function mousemove() {
+            var x0 = d3.mouse(this)[0],              
+            i = bisectDate(data, x0, 1),                  
+            d0 = data[i - 1],  
+            d1 = data[i],                                  
+            d = x0 - parseFloat(d0.sensorday)> parseFloat(d1.sensorday)- x0 ? d1 : d0;     
+
+        focus.select("circle.y")                           
+            .attr("transform",                            
+                  "translate(" + x(d.sensorday) + "," +        
+                                 y(d.num_obs) + ")");        
+    }                                                
+        
+
+</script>
+<script>
+var data = {{{sensordata}}} ; 
+
+var margin = { top: 30, right: 120, bottom: 30, left: 50 },
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom,
+        tooltip = { width: 100, height: 100, x: 10, y: -30 };
+
+
+    var x = d3.scale.ordinal()
+            .rangeRoundBands([0, width], .1);
+
+    var y = d3.scale.linear()
+            .range([height, 0]);
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+
+    var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left")
+        .ticks(4)
+
+    var line = d3.svg.line()
+        .x(function(d) { return x(d.sensorday); })
+        .y(function(d) { return y(d.avg_obs); });
+
+var valueline = d3.svg.line()
+    .x(function(d) { return x(d.sensorday); })
+    .y(function(d) { return y(d.avg_obs); });
+    
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+    var lineSvg = svg.append("g");
+    var bisectDate = d3.bisector(function(d) { return d.sensorday; }).left;
+    
+  x.domain(data.map(function(d) { return d.sensorday; }));
+  y.domain([0, d3.max(data, function(d) { return d.avg_obs; })]);
+
+svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Avg Temp");
+            
+            svg.append("path")
+            .datum(data)
+            .attr("class", "line")
+            .attr("d", line);
+
+            var focus = svg.append("g")
+            .attr("class", "focus")
+            .style("display", "none");
+            
+            lineSvg.append("path")
+            .attr("class", "line")
+            .attr("d", valueline(data));
+
+            focus.append("circle")
+            .attr("class", "y")
+            .style("fill", "none") 
+            .style("stroke", "blue") 
+            .attr("r", 5);
+
+            svg.append("rect")
+            .attr("class", "overlay")
+            .attr("width", width)
+            .attr("height", height)
+            .on("mouseover", function() { focus.style("display", null); })
+            .on("mouseout", function() { focus.style("display", "none"); })
+            .on("mousemove", mousemove);
+
+        function mousemove() {
+            var x0 = d3.mouse(this)[0],              
+            i = bisectDate(data, x0, 1),                  
+            d0 = data[i - 1],  
+            d1 = data[i],                                  
+            d = x0 - parseFloat(d0.sensorday)> parseFloat(d1.sensorday)- x0 ? d1 : d0;  
+
+        focus.select("circle.y")                           
+            .attr("transform",                            
+                  "translate(" + x(d.sensorday) + "," +        
+                                 y(d.avg_obs) + ")");        
+    }                                                
+        
 </script>

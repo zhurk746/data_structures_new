@@ -29,19 +29,52 @@ var hx = `<!doctype html>
   <title>AA Meetings</title>
   <meta name="description" content="Meetings of AA in Manhattan">
   <meta name="author" content="AA">
-  <link rel="stylesheet" href="css/styles.css?v=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+  <link rel="stylesheet" href="styles.css?v=1.0">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+       crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"
+       crossorigin=""/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"
        crossorigin=""/>
 </head>
 <style>
-#mapid { height: 760px; }
+#mapid { height: 760px; width: 80%; float: right}
+.popupCustom .leaflet-popup-tip,
+.popupCustom .leaflet-popup-content-wrapper {
+      background: #080808;
+    color: #ffffff;
+    font-size: 11px;
+}
+.mapkey {width: 20%; height: 100%; float: left}
+.legend { list-style: none; font-family:sans-serif;}
+.legend li { float: none; margin-right: 30px; }
+.legend span { border: 1px solid #ccc; float: left; width: 12px; height: 12px; }
+/* your colors */
+.legend .beginner { background-color: #ffd500; }
+.legend .openmeeting { background-color: #a2a2a2; }
+.legend .closed { background-color: #080808; }
+.legend .bigbook { background-color: #3580db; }
+.legend .stepmeeting { background-color: #a20eb5; }
 </style>
-<body>
+<body style="background-color:#ddfada;">
+<div class="mapkey">
+<h2 style="font-family:sans-serif; color:#080808; font-size:24px;"> AA Meetings in Manhattan: </h2>
+<p style="font-family:sans-serif; font-size: 12px;">Each marker on the map to the right represents an available AA meeting. Clusters represent a multitude of meetings that occur at the same location. Toggle and select any marker or marker cluster to find details regarding an Alcoholics Anonymous Meeting in your preferred Manhattan location. 
+Markers are color coded according to meeting type. Reference the legend below for further information.</p>
+    <ul class="legend">
+    <li><span class="beginner"></span>Beginner Meeting</li>
+    <li><span class="openmeeting"></span>Open Discussion Meeting</li>
+    <li><span class="closed"></span>Closed Discussion Meeting</li>
+    <li><span class="bigbook"></span>Big Book Meeting</li>
+    <li><span class="stepmeeting"></span>Step Meeting</li>
+</ul>
+</div>
 <div id="mapid"></div>
 <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
    crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
   <script>
   var data = 
   `;
@@ -53,11 +86,13 @@ var jx = `;
     tileSize: 512,
     maxZoom: 18,
     zoomOffset: -1,
+    opacity: .50,
     id: 'mapbox/streets-v11',
         accessToken: 'pk.eyJ1Ijoidm9ucmFtc3kiLCJhIjoiY2pveGF1MmxoMjZnazNwbW8ya2dsZTRtNyJ9.mJ1kRVrVnwTFNdoKlQu_Cw'
     }).addTo(mymap);
-    var greenIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    
+    var greyIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -65,18 +100,76 @@ var jx = `;
   shadowSize: [41, 41]
 });
 
+var blueIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+var goldIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+var blackIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-black.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+var violetIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+var customOptions =
+    {
+    'maxWidth': '400',
+    'width': '200',
+    'className' : 'popupCustom',
+    };
     for (var i=0; i<data.length; i++) {
-        L.marker([data[i].mtglat, data[i].mtglong], {icon: greenIcon}).bindPopup(JSON.stringify(data[i].meetings)).addTo(mymap);
+    var aaMarkers=L.markerClusterGroup();
+    for (var j=0; j<data[i].meetings.length; j++){
+   var customPopup=data[i]["meetings"][j]["day"] + '<br>' +data[i]["meetings"][j]["name"] + '<br>' +data[i]["meetings"][j]["address"] + '<br>' +data[i]["meetings"][j]["shour"];
+    if (data[i]["meetings"][j]["types"]=="B = Beginners meeting"){
         
-    }
-    console.log(data[1]["meetings"][0]["day"])
+       aaMarkers.addLayer(L.marker([data[i].mtglat, data[i].mtglong], {icon: goldIcon}).bindPopup(customPopup, customOptions)).addTo(mymap);
+    } else if (data[i]["meetings"][j]["types"]=="S = Step meeting"){
+       
+       aaMarkers.addLayer(L.marker([data[i].mtglat, data[i].mtglong], {icon: violetIcon}).bindPopup(customPopup, customOptions)).addTo(mymap); 
+    } else if (data[i]["meetings"][j]["types"]=="OD = Open Discussion meeting"){
+       
+        aaMarkers.addLayer(L.marker([data[i].mtglat, data[i].mtglong], {icon: greyIcon}).bindPopup(customPopup, customOptions)).addTo(mymap);
+    } else if (data[i]["meetings"][j]["types"]=="C = Closed Discussion meeting"){
+       
+        aaMarkers.addLayer(L.marker([data[i].mtglat, data[i].mtglong], {icon: blackIcon}).bindPopup(customPopup, customOptions)).addTo(mymap);
+    } else if (data[i]["meetings"][j]["types"]=="BB = Big Book meeting"){
+       
+         aaMarkers.addLayer(L.marker([data[i].mtglat, data[i].mtglong], {icon: blueIcon}).bindPopup(customPopup, customOptions)).addTo(mymap);
+    } 
+    }    
+    };
     </script>
     </body>
     </html>`;
 
 
 app.get('/', function(req, res) {
-    res.send('<h3>Kasey Zhuravlev Final Project</h3><ul><li><a href="/aa">AA Meetings Map</a></li><li><a href="/temperature">Temp Sensor Data</a></li><li><a href="/processblog">Restaurant Recommendations</a></li></ul>');
+    res.send('<h3>Kasey Zhuravlev Final Projects- Data Structures 2020</h3><ul><li><a href="/aa">AA Meetings Map</a></li><li><a href="/temperature">Temp Sensor Data</a></li><li><a href="/processblog">Covid Restaurant Blog</a></li></ul>');
 }); 
 
 // respond to requests for /aa
@@ -93,10 +186,10 @@ app.get('/aa', function(req, res) {
     const client = new Pool(db_credentials);
     
     // SQL query 
-    var thisQuery = `SELECT mtgLat, mtgLong, json_agg(json_build_object('loc', mtgPlace, 'address', mtgAddress, 'name', mtgName, 'day', mtgDay, 'types', mtgTypeOf, 'shour', mtgStartTime)) as meetings
+    var thisQuery = `SELECT mtgLat, mtgLong, json_agg(json_build_object('day', mtgDay, 'name', mtgName, 'address', mtgAddress, 'shour', mtgStartTime, 'types', mtgTypeOf)) as meetings
                  FROM aaMeetings 
-                 WHERE mtgDay = ` + '\'' + dayy2 + '\'' + 
-                 `GROUP BY mtgLat, mtgLong
+                 WHERE mtgLat>40.7069
+                 GROUP BY mtgLat, mtgLong
                  ;`;
 
     client.query(thisQuery, (qerr, qres) => {
@@ -118,8 +211,10 @@ app.get('/temperature', function(req, res) {
 
     // SQL query 
     var q = `SELECT EXTRACT(DAY FROM sensorTime) as sensorday,
-             AVG(sensorValue::int) as num_obs
+             (MAX(sensorValue)-MIN(sensorValue)) as num_obs,
+             AVG(sensorValue) as avg_obs
              FROM sensorData
+             WHERE sensorValue<200
              GROUP BY sensorday
              ORDER BY sensorday;`;
 
@@ -180,7 +275,7 @@ app.get('/processblog', function(req, res) {
 });
 
 //serve static files in /public
-app.use(express.static('public'));
+app.use("/public",express.static('public'));
 
 app.use(function (req, res, next) {
   res.status(404).send("Sorry can't find that!");
