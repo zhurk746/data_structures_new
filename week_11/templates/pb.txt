@@ -17,7 +17,7 @@
 
 /* Set a background color */
 body {
-  background-color: #b5cde1;
+  background-color: #e0faf9;
   font-family: Helvetica, sans-serif;
 }
 

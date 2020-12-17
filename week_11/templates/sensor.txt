@@ -3,256 +3,173 @@
 <!-- Adapted from: http://bl.ocks.org/Caged/6476579 -->
 
 <style>
-
 body {
-        font: 10px "Helvetica Neue", Helvetica, Arial, sans-serif;
-        background-color: #c0c0c0;
-    }
-    .axis path
-    .axis line {
-        fill: none;
-        stroke: #f2f3f4;
-        shape-rendering: crispEdges;
-    }
+background-color: #ffffff;
+}
 
-    .x.axis path {
-        display: none;
-    }
-
-    .line {
-        fill: none;
-        stroke: #ff5470;
-        stroke-width: 1.5px;
-    }
-
-    .overlay {
-        fill: none;
-        pointer-events: all;
-    }
-
-    .focus circle {
-        fill: steelblue;
-    }
-
-    .focus text {
-        font-size: 14px;
-        font-color: #f2f3f4
-    }
-    
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 120px;
+  height: 28px;
+  padding: 2px;
+  font: 12px sans-serif;
+  font-weight: bold;
+  background: #6c6c6c;
+  border: 2px;
+  border-radius: 8px;
+  pointer-events: none;
+}
 </style>
 <body>
-<h1 style="color:#ff5470">Highlights of the Ongoing Battle with my Radiator Heat</h1>
-<p style="font-size: 14px;" >Uncontrollable radiator heat, AC on, all windows open, multiples blankets of varying thickness. I guess a room is room temperature regardless of the actual temperature?</p>
-<p style="font-size: 12px; color:">The below graphs represents a continuous investigation of temperature fluctations in my apartment focusing on the last month of data collected through the Particle API.
-<br> Variables that may affect the drastic shifts in temperature include: cooking, steam coming from the bathrooms, open windows, and radiator heat.
+<h1 style="color:#080808;">Temperature Fluctuations in an NYC 6th Floor Walkup</h1>
+<h2>An Ongoing Investigation</h2>
+<p> <b>Introduction:</b> 
+<br>The purpose of this experiment was to work with the Particle API to monitor the temperature in my apartment on a continuous basis in order to eventually introduce a hypothesis regarding the cause of the very noticeable temperature fluctuations. 
+My roommates and I predict that several variables that could currently affect temperature fluctations include: uncontrollable radiator heat, air conditioning, cooking, steam from the bathrooms, open windows.
+I guess a room is room temperature regardless of the actual temperature?
 </p>
 <p>
-The temperature averages around 80 degrees on any given day with fluctuations between 3 to 9 degrees.
-<br>The temperature in the apartment seems to be more comfortable during a given week when the outdoor temperature is less tumultuous.
-<br>Temperatures seem to fluctuate the most towards the end of each week and the weekends.
-<br> This is likely due to the presence of guests or more people coming in and out of the apartment over the weekend.
+<b>Procedure:</b>
+<br>In order to monitor the temperature in my apartment on a continuous basis I set up a temperature sensor in the apartment's kitchen. The kitchen serves seemingly as a neutral position for the sensor as my roommates and I have not observed it to be particularly warm or cold aside from the occasional times we are cooking.
+The temperature sensor interfaced with the Particle API and collected a temperature reading every 5 minutes. Data was then stored in a PostgreSQL database.
+The data was then mapped into the box plot within the results section below for further analysis of the minimum, maximum, median and quartile range temperature readings in my apartment on any given day within the last month.
+</p>
+<p>
+<b>Results/Observations:</b>
+<br>The box plot below shows both the maximum, minimum, median and quartile range temperature values on the apartment on a given day within the last month as well as certain specific temperature readings.
+Temperature fluctuates around 10 degrees on any given day. 
+My roommates and I predict that the temperature in the apartment seems to be more comfortable during a given week when the outdoor temperature is less tumultuous.
+Temperatures seem to fluctuate the most towards the end of each week and the weekends.
+This is likely due to the presence of guests or more people coming in and out of the apartment over the weekend.
 </p>
 
-<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 <script>
 var data = {{{sensordata}}} ; 
+var margin = {top: 10, right: 30, bottom: 30, left: 40},
+    width = 1060 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
 
-var margin = { top: 30, right: 120, bottom: 30, left: 50 },
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom,
-        tooltip = { width: 100, height: 100, x: 10, y: -30 };
-
-
-    var x = d3.scale.ordinal()
-            .rangeRoundBands([0, width], .1);
-
-    var y = d3.scale.linear()
-            .range([height, 0]);
-
-    var xAxis = d3.svg.axis()
-        .scale(x)
-        .orient("bottom");
-
-    var yAxis = d3.svg.axis()
-        .scale(y)
-        .orient("left")
-
-    var line = d3.svg.line()
-        .x(function(d) { return x(d.sensorday); })
-        .y(function(d) { return y(d.num_obs); });
-
-var valueline = d3.svg.line()
-    .x(function(d) { return x(d.sensorday); })
-    .y(function(d) { return y(d.avg_obs); });
+var svg = d3.select("body")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+          
+          
+    var sumstat = d3.nest() 
+    .key(function(d) { return d.sensorday;})
+    .rollup(function(d) {
+      q1 = d3.quantile(d.map(function(g) { return g.avg_obs;}).sort(d3.ascending),.25)
+      median = d3.quantile(d.map(function(g) { return g.avg_obs;}).sort(d3.ascending),.5)
+      q3 = d3.quantile(d.map(function(g) { return g.avg_obs;}).sort(d3.ascending),.75)
+      interQuantileRange = q3 - q1
+      min = q1 - 1.5 * interQuantileRange
+      max = q3 + 1.5 * interQuantileRange
+      return({q1: q1, median: median, q3: q3, interQuantileRange: interQuantileRange, min: min, max: max})
+    })
+    .entries(data)
     
-    var svg = d3.select("body").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    var x = d3.scaleBand()
+    .range([ 0, width ])
+    .domain(data.map(function(d) { return d.sensorday; }))
+    .paddingInner(1)
+    .paddingOuter(.5)
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x))
     
-    var lineSvg = svg.append("g");
-    var bisectDate = d3.bisector(function(d) { return d.sensorday; }).left;
-    
-  x.domain(data.map(function(d) { return d.sensorday; }));
-  y.domain([0, d3.max(data, function(d) { return d.num_obs; })]);
-
-svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
-
-        svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis)
-            .append("text")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", ".71em")
-            .style("text-anchor", "end")
-            .text("Temp Fluctation");
-            
-            
-            svg.append("path")
-            .datum(data)
-            .attr("class", "line")
-            .attr("d", line);
-
-            var focus = svg.append("g")
-            .attr("class", "focus")
-            .style("display", "none");
-            
-            lineSvg.append("path")
-            .attr("class", "line")
-            .attr("d", valueline(data));
-
-            focus.append("circle")
-            .attr("class", "y")
-            .style("fill", "none") 
-            .style("stroke", "blue") 
-            .attr("r", 5);
-
-            svg.append("rect")
-            .attr("class", "overlay")
-            .attr("width", width)
-            .attr("height", height)
-            .on("mouseover", function() { focus.style("display", null); })
-            .on("mouseout", function() { focus.style("display", "none"); })
-            .on("mousemove", mousemove);
-
-        function mousemove() {
-            var x0 = d3.mouse(this)[0],              
-            i = bisectDate(data, x0, 1),                  
-            d0 = data[i - 1],  
-            d1 = data[i],                                  
-            d = x0 - parseFloat(d0.sensorday)> parseFloat(d1.sensorday)- x0 ? d1 : d0;     
-
-        focus.select("circle.y")                           
-            .attr("transform",                            
-                  "translate(" + x(d.sensorday) + "," +        
-                                 y(d.num_obs) + ")");        
-    }                                                
+    var y = d3.scaleLinear()
+    .domain([68, d3.max(data, function(d) { return d.avg_obs; })])
+    .range([height, 0])
+  svg.append("g").call(d3.axisLeft(y))
+  
+  svg
+    .selectAll("vertLines")
+    .data(sumstat)
+    .enter()
+    .append("line")
+      .attr("x1", function(d){return(x(d.key))})
+      .attr("x2", function(d){return(x(d.key))})
+      .attr("y1", function(d){return(y(d.value.min))})
+      .attr("y2", function(d){return(y(d.value.max))})
+      .attr("stroke", "black")
+      .style("width", 40)
+      
+      var boxWidth = 20
+  svg
+    .selectAll("boxes")
+    .data(sumstat)
+    .enter()
+    .append("rect")
+        .attr("x", function(d){return(x(d.key)-boxWidth/2)})
+        .attr("y", function(d){return(y(d.value.q3))})
+        .attr("height", function(d){return(y(d.value.q1)-y(d.value.q3))})
+        .attr("width", boxWidth )
+        .attr("stroke", "black")
+        .style("fill", "#c0c0c0")
         
+        
+        svg
+    .selectAll("medianLines")
+    .data(sumstat)
+    .enter()
+    .append("line")
+      .attr("x1", function(d){return(x(d.key)-boxWidth/2) })
+      .attr("x2", function(d){return(x(d.key)+boxWidth/2) })
+      .attr("y1", function(d){return(y(d.value.median))})
+      .attr("y2", function(d){return(y(d.value.median))})
+      .attr("stroke", "black")
+      .style("width", 80)
+   
+   var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+    
+      var jitterWidth = 10
+svg
+  .selectAll("indPoints")
+  .data(data)
+  .enter()
+  .append("circle")
+    .attr("cx", function(d){return(x(d.sensorday) - jitterWidth/2 + Math.random()*jitterWidth )})
+    .attr("cy", function(d){return(y(d.avg_obs))})
+    .attr("r", 3)
+    .style("fill", "#ff3855")
+    .attr("stroke", "black")
+    .on("mouseover", function(d) {
+       div.transition()
+         .duration(200)
+         .style("opacity", .9);
+       div.html(d.sensorday + "<br/>" + d.avg_obs)
+         .style("left", (d3.event.pageX) + "px")
+         .style("top", (d3.event.pageY - 28) + "px");
+       })
+     .on("mouseout", function(d) {
+       div.transition()
+         .duration(500)
+         .style("opacity", 0);
+       });
 
 </script>
+
+<p>
+<b> Conclusion/Next Steps: </b>
+<br>Temperature sensor data collected from the Particle API helped to provide a quantitative analysis that showed how drastic the temperature fluctuations in my apartment really are. 
+Given that the standard room temperature for a room is around 68 degrees fahrenheit the temperature readings allowed me to understand why the apartment always feels uncomfortably warm. 
+Temperature in the apartment has not dropped below 70 degrees since the building heat was turned on in late October/early November. 
+I predict the high temperature is mostly due to the fact that we live on the highest floor of a building where we do not control the heat.
+However,I hope to further this investigation by potentially moving the sensor to a different location where an independent variable that may affect apartment temperature can be easily controlled.
+</p>
+
 <script>
-var data = {{{sensordata}}} ; 
-
-var margin = { top: 30, right: 120, bottom: 30, left: 50 },
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom,
-        tooltip = { width: 100, height: 100, x: 10, y: -30 };
-
-
-    var x = d3.scale.ordinal()
-            .rangeRoundBands([0, width], .1);
-
-    var y = d3.scale.linear()
-            .range([height, 0]);
-
-    var xAxis = d3.svg.axis()
-        .scale(x)
-        .orient("bottom");
-
-    var yAxis = d3.svg.axis()
-        .scale(y)
-        .orient("left")
-        .ticks(4)
-
-    var line = d3.svg.line()
-        .x(function(d) { return x(d.sensorday); })
-        .y(function(d) { return y(d.avg_obs); });
-
-var valueline = d3.svg.line()
-    .x(function(d) { return x(d.sensorday); })
-    .y(function(d) { return y(d.avg_obs); });
-    
-    var svg = d3.select("body").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    
-    var lineSvg = svg.append("g");
-    var bisectDate = d3.bisector(function(d) { return d.sensorday; }).left;
-    
-  x.domain(data.map(function(d) { return d.sensorday; }));
-  y.domain([0, d3.max(data, function(d) { return d.avg_obs; })]);
-
-svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
-
-        svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis)
-            .append("text")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", ".71em")
-            .style("text-anchor", "end")
-            .text("Avg Temp");
-            
-            svg.append("path")
-            .datum(data)
-            .attr("class", "line")
-            .attr("d", line);
-
-            var focus = svg.append("g")
-            .attr("class", "focus")
-            .style("display", "none");
-            
-            lineSvg.append("path")
-            .attr("class", "line")
-            .attr("d", valueline(data));
-
-            focus.append("circle")
-            .attr("class", "y")
-            .style("fill", "none") 
-            .style("stroke", "blue") 
-            .attr("r", 5);
-
-            svg.append("rect")
-            .attr("class", "overlay")
-            .attr("width", width)
-            .attr("height", height)
-            .on("mouseover", function() { focus.style("display", null); })
-            .on("mouseout", function() { focus.style("display", "none"); })
-            .on("mousemove", mousemove);
-
-        function mousemove() {
-            var x0 = d3.mouse(this)[0],              
-            i = bisectDate(data, x0, 1),                  
-            d0 = data[i - 1],  
-            d1 = data[i],                                  
-            d = x0 - parseFloat(d0.sensorday)> parseFloat(d1.sensorday)- x0 ? d1 : d0;  
-
-        focus.select("circle.y")                           
-            .attr("transform",                            
-                  "translate(" + x(d.sensorday) + "," +        
-                                 y(d.avg_obs) + ")");        
-    }                                                
-        
+d3.selectAll('h2').style("color","#ff3855")
+d3.selectAll('p').style("color","#080808")
+d3.selectAll('h2').style("font-family","American Typewriter")
+d3.selectAll('p').style("font-family", "American Typewriter")
+d3.selectAll('h1').style("font-family", "American Typewriter")
 </script>

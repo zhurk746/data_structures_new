@@ -52,15 +52,15 @@ var hx = `<!doctype html>
 .legend span { border: 1px solid #ccc; float: left; width: 12px; height: 12px; }
 /* your colors */
 .legend .beginner { background-color: #ffd500; }
-.legend .openmeeting { background-color: #a2a2a2; }
+.legend .openmeeting { background-color: #647476; }
 .legend .closed { background-color: #080808; }
 .legend .bigbook { background-color: #3580db; }
 .legend .stepmeeting { background-color: #a20eb5; }
 </style>
-<body style="background-color:#ddfada;">
+<body style="background-color:#d4f3c5;">
 <div class="mapkey">
-<h2 style="font-family:sans-serif; color:#080808; font-size:24px;"> AA Meetings in Manhattan: </h2>
-<p style="font-family:sans-serif; font-size: 12px;">Each marker on the map to the right represents an available AA meeting. Clusters represent a multitude of meetings that occur at the same location. Toggle and select any marker or marker cluster to find details regarding an Alcoholics Anonymous Meeting in your preferred Manhattan location. 
+<h2 style="font-family:sans-serif; color:#080808; font-size:24px;"> All AA Meetings in Manhattan: </h2>
+<p style="font-family:sans-serif; font-size: 14px;">Each marker on the map to the right represents an available AA meeting. Clusters represent a multitude of meetings that occur at the same location. Toggle and select any marker or marker cluster to find details regarding an Alcoholics Anonymous Meeting in your preferred Manhattan location. 
 Markers are color coded according to meeting type. Reference the legend below for further information.</p>
     <ul class="legend">
     <li><span class="beginner"></span>Beginner Meeting</li>
@@ -144,7 +144,7 @@ var customOptions =
     for (var i=0; i<data.length; i++) {
     var aaMarkers=L.markerClusterGroup();
     for (var j=0; j<data[i].meetings.length; j++){
-   var customPopup=data[i]["meetings"][j]["day"] + '<br>' +data[i]["meetings"][j]["name"] + '<br>' +data[i]["meetings"][j]["address"] + '<br>' +data[i]["meetings"][j]["shour"];
+   var customPopup='<b>'+data[i]["meetings"][j]["name"] + '</b>' + '<br>' +data[i]["meetings"][j]["address"] + '<br>' +'<p> Meeting Begins: </p>' + data[i]["meetings"][j]["day"] + '<br>'+ data[i].local_time;
     if (data[i]["meetings"][j]["types"]=="B = Beginners meeting"){
         
        aaMarkers.addLayer(L.marker([data[i].mtglat, data[i].mtglong], {icon: goldIcon}).bindPopup(customPopup, customOptions)).addTo(mymap);
@@ -186,10 +186,10 @@ app.get('/aa', function(req, res) {
     const client = new Pool(db_credentials);
     
     // SQL query 
-    var thisQuery = `SELECT mtgLat, mtgLong, json_agg(json_build_object('day', mtgDay, 'name', mtgName, 'address', mtgAddress, 'shour', mtgStartTime, 'types', mtgTypeOf)) as meetings
+    var thisQuery = `SELECT mtgLat, mtgLong, json_agg(json_build_object('day', mtgDay, 'name', mtgName, 'address', mtgAddress, 'shour', mtgStartTime, 'types', mtgTypeOf)) as meetings,
+                 TO_CHAR(TO_TIMESTAMP(mtgStartTime::TEXT, 'HH24:MI'),'HH12:MI:AM') as local_time
                  FROM aaMeetings 
-                 WHERE mtgLat>40.7069
-                 GROUP BY mtgLat, mtgLong
+                 GROUP BY mtgLat, mtgLong, mtgStartTime
                  ;`;
 
     client.query(thisQuery, (qerr, qres) => {
@@ -211,11 +211,10 @@ app.get('/temperature', function(req, res) {
 
     // SQL query 
     var q = `SELECT EXTRACT(DAY FROM sensorTime) as sensorday,
-             (MAX(sensorValue)-MIN(sensorValue)) as num_obs,
-             AVG(sensorValue) as avg_obs
+             sensorValue as avg_obs
              FROM sensorData
              WHERE sensorValue<200
-             GROUP BY sensorday
+             GROUP BY sensorday, avg_obs
              ORDER BY sensorday;`;
 
     client.connect();
